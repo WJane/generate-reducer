@@ -1,0 +1,25 @@
+{
+  "name": "reducer-module",
+  "version": "1.0.0",
+  "description": "reducer-module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WJane/reducer-module.git"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "reducer",
+    "restfulApi"
+  ],
+  "author": "JaneWu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WJane/reducer-module/issues"
+  },
+  "homepage": "https://github.com/WJane/reducer-module#readme"
+}
