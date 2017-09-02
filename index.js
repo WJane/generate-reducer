@@ -1,13 +1,8 @@
-var fs = require("fs");
-
+import content from './reducerConfig'
+var fs = require("fs")
 console.log("正在生成reducer")
 const fileName = 'fund'
 const webName = 'wz'
-const content = [
-    {routing: '/funds', type: 'get', func: 'getFund', parameter: 'params'},
-    {routing: '/files/${id}/files', type: 'post', func: 'getPost', parameter: 'id, data'},
-    {routing: '/files/${id}', type: 'del', func: 'deleteFile', parameter: 'id'}
-]
 let moduleContent = ''
 const PENDDING = []
 const SUCCESS = []

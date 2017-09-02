@@ -1,0 +1,1 @@
+rm -rf dist && rm -rf reducer && mkdir dist && babel reducerConfig.js -o dist/reducerConfig.js && babel index.js -o dist/dist.js && mkdir reducer && node dist/dist
