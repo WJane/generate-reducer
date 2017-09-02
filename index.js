@@ -1,8 +1,6 @@
-import content from './reducerConfig'
+import {content, moduleName, webName} from './reducerConfig'
 var fs = require("fs")
 console.log("正在生成reducer")
-const fileName = 'fund'
-const webName = 'wz'
 let moduleContent = ''
 const PENDDING = []
 const SUCCESS = []
@@ -11,7 +9,7 @@ const UNITS = []
 let funcStr = ''
 const fragment_one = `
 const initialState = {
-  ${fileName}s: {}
+  ${moduleName}s: {}
 }
 
 export default function reducer(state = initialState, action = {}) {
@@ -36,7 +34,7 @@ function generateName() {
         unit.push(failBaseName)
         UNITS.push(unit)
         unit.map(name => {
-            nameStatement += `const ${name} = '${webName}/${fileName}/${name}'\n`
+            nameStatement += `const ${name} = '${webName}/${moduleName}/${name}'\n`
         })
     })
     return nameStatement
@@ -81,7 +79,24 @@ function generateFunction() {
 }
 
 const result = generateName() + fragment_one + generateCase() + fragment_two + generateFunction()
-fs.writeFile(`reducer/${fileName}.js`, result,  function(err) {
+const reducer = `
+import {combineReducers} from 'redux'
+import {routerReducer} from 'react-router-redux'
+import {reducer as reduxAsyncConnect} from 'redux-connect'
+
+import ${moduleName} from './${moduleName}'
+
+export default combineReducers({
+  routing: routerReducer,
+  reduxAsyncConnect,
+  ${moduleName},
+})`
+fs.writeFile(`reducer/reducer.js`, reducer, function(err) {
+    if (err) {
+        console.log(err)
+    }
+})
+fs.writeFile(`reducer/${moduleName}.js`, result,  function(err) {
    if (err) {
        return console.error(err);
    }
