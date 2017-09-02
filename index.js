@@ -1,74 +1,94 @@
 var fs = require("fs");
 
-console.log("准备写入文件")
+console.log("正在生成reducer")
 const fileName = 'fund'
 const webName = 'wz'
 const content = [
-    {routing: '/funds', type: 'get', func: 'getFund', parameter: ''}
+    {routing: '/funds', type: 'get', func: 'getFund', parameter: 'params'},
+    {routing: '/files/${id}/files', type: 'post', func: 'getPost', parameter: 'id, data'},
+    {routing: '/files/${id}', type: 'del', func: 'deleteFile', parameter: 'id'}
 ]
-const moduleContent = ''
+let moduleContent = ''
 const PENDDING = []
 const SUCCESS = []
 const FAIL = []
-const funcStr = ''
-const fragment_one = `export default function reducer(state = initialState, action = {}) {
-  switch (action.type) {`
-function convertName(srcName) {
-    return srcName.split(/[A-Z]/).join('_').toUpperCase()
+const UNITS = []
+let funcStr = ''
+const fragment_one = `
+const initialState = {
+  ${fileName}s: {}
 }
-function generateModule() {
+
+export default function reducer(state = initialState, action = {}) {
+  switch (action.type) {\n`
+
+function convertName(srcName) {
+    return srcName.match(/^[a-z]+|[A-Z][a-z]+/g).join('_').toUpperCase()
+}
+
+function generateName() {
+    let nameStatement = ''
     content.forEach(item => {
+        const unit = []
         const baseName = convertName(item.func)
         PENDDING.push(baseName)
+        unit.push(baseName)
         const successBaseName = baseName + '_SUCCESS'
         SUCCESS.push(successBaseName)
+        unit.push(successBaseName)
         const failBaseName = baseName + '_FAIL'
         FAIL.push(failBaseName)
-        [baseName, successBaseName, failBaseName].map(name => {
-            moduleContent += `const ${baseName} = 'qutke-web/fund/${baseName}`
+        unit.push(failBaseName)
+        UNITS.push(unit)
+        unit.map(name => {
+            nameStatement += `const ${name} = '${webName}/${fileName}/${name}'\n`
         })
-        const funcModel = 
-`        export function ${item.func}() {
-            return {
-                types: [baseName, successBaseName, failBaseName],
-                promise: (client) => client.get(`${item.routing}`)
-            }
-        }`
-        funcStr += funcModel
     })
+    return nameStatement
 }
 
 function generateCase() {
-    const penddingCase = ''
-    const failCase = ''
-    const successCase = ''
-    PENDDING.map(name => {
-        penddingCase += ('case ' + name + ':' + '\n')
+    let caseName = ''
+    PENDDING.map(pendding => {
+        caseName += `\tcase ${pendding}:\n`
     })
-    penddingCase += 'return {...state, requesting: true}'
-    FAIL.map(name => {
-        failCase += ('case ' + name + ':' + '\n')
+    caseName += `\t\treturn {\n\t\t\t...state,\n\t\t\trequesting: true,\n\t\t\t}\n`
+    FAIL.map(fail => {
+        caseName += `\tcase ${fail}:\n`
     })
-    penddingCase += 'return {...state, requesting: false, error: action.error}'
-    SUCCESS.map(name => {
-        const stateName = fileName + 's'
-        const model = `
-            case LOAD_SCORE_SUCCESS:
-            return {
-                ...state,
-                requesting: false,
-                ${stateName}: action.result
-            }
-        `
-        successCase +=  model
-    })
-    return penddingCase + failCase + successCase
+    caseName += `\t\treturn {\n\t\t\t...state,\n\t\t\trequesting: false,\n\t\t\terror: action.result,\n\t\t}\n`
+    return caseName
 }
 
-const result = moduleContent + funcStr + generateCase()
-fs.writeFile('test.js', result,  function(err) {
+const fragment_two = `    
+    default:
+        return state
+    }
+}\n`
+
+function generateFunction() {
+    let functions = ''
+    content.map((item, index) => {
+        const func = item.func
+        const type = item.type
+        const routing = item.routing
+        const parameter = item.parameter
+        const params = !!parameter ? `, {${parameter}}` : ''
+        const model = `export function ${func}(${parameter}) {
+    return {
+        types: [${UNITS[index][0]}, ${UNITS[index][1]}, ${UNITS[index][2]}],
+        promise: (client) => client.${type}('${routing}'${params}),
+    }
+}\n`
+        functions += model
+    })
+    return functions
+}
+
+const result = generateName() + fragment_one + generateCase() + fragment_two + generateFunction()
+fs.writeFile(`reducer/${fileName}.js`, result,  function(err) {
    if (err) {
        return console.error(err);
    }
-   console.log("数据写入成功！");
+   console.log("已生成reducer模块");
 });
