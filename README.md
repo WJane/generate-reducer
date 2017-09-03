@@ -5,4 +5,4 @@ Auto generate reducer module based on RESTful
 # 配置
 要在reducerConfig.js中配置好生成模块的基本信息，包括路由，参数等。参见reducerConfig.js中给出的示例。
 # 运行
-npm start或者运行start.sh脚本，终端输入bash start.sh 最后将在reducer中生成所需要的module
+npm start或者运行start.sh脚本，终端输入bash start.sh 最后将在reducer文件夹下生成所需要的module
